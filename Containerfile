@@ -81,16 +81,16 @@ RUN chmod +x /usr/bin/container-latest
 # ╭――――――――――――――――――――╮
 # │ IMGVERSION         │
 # ╰――――――――――――――――――――╯
-# COPY imgversion.sh /usr/bin/container-imgversion
-# RUN chmod +x /usr/bin/container-imgversion
+COPY imgversion.sh /usr/bin/container-imgversion
+RUN chmod +x /usr/bin/container-imgversion
 
 # ╭――――――――――――――――――――╮
 # │ HEALTH             │
 # ╰――――――――――――――――――――╯
 COPY appversion-check.sh /etc/container/health.d/appversion-check
 RUN chmod +x /etc/container/health.d/appversion-check
-COPY imgversion.sh /etc/container/health.d/imgversion-check
-RUN chmod +x /etc/container/health.d/imgversion-check
+# COPY imgversion.sh /etc/container/health.d/imgversion-check
+# RUN chmod +x /etc/container/health.d/imgversion-check
 COPY coredns-running.sh /etc/container/health.d/coredns-running
 RUN chmod +x /etc/container/health.d/coredns-running
 
