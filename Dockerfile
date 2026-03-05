@@ -2,8 +2,8 @@ FROM alpine:3.12.1 as config-alpine
 
 RUN apk add --no-cache tzdata
 
-RUN cp -v /usr/share/zoneinfo/America/New_York /etc/localtime
-RUN echo "America/New_York" > /etc/timezone
+RUN cp -v /usr/share/zoneinfo/America/New_York /etc/localtime \
+ && echo "America/New_York" > /etc/timezone
 
 FROM alpine:3.12.1 as src-coredns
 
@@ -12,13 +12,13 @@ COPY --from=config-alpine /etc/timezone  /etc/timezone
 
 RUN apk add --no-cache git go
 
-# Pull the coredns source code from github. 
-RUN git config --global advice.detachedHead false
-RUN git clone --branch v1.8.0 --depth 1 https://github.com/coredns/coredns.git coredns
+# Pull the coredns source code from github.
+RUN git config --global advice.detachedHead false \
+ && git clone --branch v1.8.0 --depth 1 https://github.com/coredns/coredns.git coredns
 
-WORKDIR /coredns                                                                                                                                                       
-RUN go generate 
-RUN go build
+WORKDIR /coredns
+RUN go generate \
+ && go build
 
 FROM alpine:3.12.1
 
@@ -36,7 +36,7 @@ COPY --from=src-coredns /coredns/coredns /usr/bin/coredns
 
 # COPY config/Corefile /etc/coredns/Corefile
 # COPY config/zone.example.local /etc/coredns/zone.example.local
-# COPY config/hosts /etc/coredns/hosts 
+# COPY config/hosts /etc/coredns/hosts
 
 ENTRYPOINT ["/usr/bin/coredns"]
 CMD ["-conf", "/etc/coredns/Corefile"]
