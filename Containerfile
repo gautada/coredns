@@ -3,7 +3,7 @@ ARG CONTAINER_VERSION=13.3
 # ╭――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――╮
 # │ STAGE 1: Build CoreDNS from source                                       │
 # ╰――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――╯
-FROM golang:1.23-bookworm AS builder
+FROM golang:1.25-trixie AS builder
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends git \
