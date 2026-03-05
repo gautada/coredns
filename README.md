@@ -7,7 +7,7 @@ The [CoreDNS](https://coredns.io) image provides a DNS service with multiple asp
 - **[kubernetes](https://coredns.io/plugins/kubernetes/)** - cluster dynamic name resolution
 - **[file](https://coredns.io/plugins/file/)** - system name resolution using a zone file insidedescribing a private LAN
 - **[hosts](https://coredns.io/plugins/hosts/)** - Serving zones from a `/etc/hosts` file.
-- **[forward](https://coredns.io/plugins/forward/)** - local dns access for internet name resolution 
+- **[forward](https://coredns.io/plugins/forward/)** - local dns access for internet name resolution
 
 ## Notes
 
@@ -18,7 +18,7 @@ CoreDNS could be used to provide a blacklist to block domains (i.e. advertising 
 - [The Big Blocklist Collection](https://firebog.net)
 - [Steven Black's Hosts File](https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts)
 - [AdAway](https://adaway.org/hosts.txt)
-- 
+-
 
 ### Corefile
 CoreDNS is generally configured using the `Corefile`. For example:
@@ -45,9 +45,9 @@ CoreDNS is generally configured using the `Corefile`. For example:
 #### kubernetes
 The **kubernetes** plug-in provides an automatic dns lookup for services in a kubernetes cluster.  Services can be accessed via the name pattern `[SERVICE].[NAMESAPCE].svc.cluster.local`.
 
-This service is intended to run inside of a microk8s kubernetes cluster; as such the environment variables (`KUBERNETES_SERVICE_HOST` and `KUBERNETES_SERVICE_PORT`) must be set to get the plugin working properly when running inside a non-k8s environment. 
+This service is intended to run inside of a microk8s kubernetes cluster; as such the environment variables (`KUBERNETES_SERVICE_HOST` and `KUBERNETES_SERVICE_PORT`) must be set to get the plugin working properly when running inside a non-k8s environment.
 
-**Error Message** 
+**Error Message**
 ```
 plugin/kubernetes: unable to load in-cluster configuration, KUBERNETES_SERVICE
 _HOST and KUBERNETES_SERVICE_PORT must be defined
@@ -59,11 +59,11 @@ docker run --env KUBERNETES_SERVICE_HOST=192.168.4.200 \
            --env KUBERNETES_SERVICE_PORT=16443 -it --rm \
            --name coredns coredns:build
 ```
- 
-#### file
-The **file** plug-in provides a mechanism to provide for a [DNS Zone](https://help.dyn.com/how-to-format-a-zone-file/). A DNS Zone is defined as text based zone file. 
 
-This is used to provide the **.local zone** for a local network. This is provided as configuration file `/etc/container/zone.[DOMAIN].local`. 
+#### file
+The **file** plug-in provides a mechanism to provide for a [DNS Zone](https://help.dyn.com/how-to-format-a-zone-file/). A DNS Zone is defined as text based zone file.
+
+This is used to provide the **.local zone** for a local network. This is provided as configuration file `/etc/container/zone.[DOMAIN].local`.
 
 **Example**
 ```
