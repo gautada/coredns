@@ -143,7 +143,4 @@ test1.example.local. 30  IN      A       192.168.0.1
 - [Deploying a DNS Server Using Docker](http://www.damagehead.com/blog/2015/04/28/deploying-a-dns-server-using-docker/)
 - [Beginner's Guide to BIND](https://linuxtechlab.com/configuring-dns-server-using-bind/)
 - [named Manual Page](https://linux.die.net/man/8/named)
-- https://www.dns-reverse.net/testing-reverse-dns-with-dig-command/
-
-
-ff
+- [NO BARE](https://www.dns-reverse.net/testing-reverse-dns-with-dig-command/)
