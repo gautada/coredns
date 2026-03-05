@@ -81,8 +81,8 @@ RUN chmod +x /usr/bin/container-latest
 # ╭――――――――――――――――――――╮
 # │ IMGVERSION         │
 # ╰――――――――――――――――――――╯
-COPY imgversion.sh /usr/bin/container-imgversion
-RUN chmod +x /usr/bin/container-imgversion
+# COPY imgversion.sh /usr/bin/container-imgversion
+# RUN chmod +x /usr/bin/container-imgversion
 
 # ╭――――――――――――――――――――╮
 # │ HEALTH             │
