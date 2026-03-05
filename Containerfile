@@ -1,126 +1,109 @@
-# Docker/Podman/OCI container build specfication file.
-#
-# References:
-# - [Gist](https://gist.github.com/gautada/bd71914073b8e3a89ad13f0320b33010)
-# - [Buildah Containerfile](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/building_running_and_managing_containers/assembly_building-container-images-with-buildah_building-running-and-managing-containers#proc_building-an-image-from-a-containerfile-with-buildah_assembly_building-container-images-with-buildah)
-# - [Dockerfile](https://docs.docker.com/engine/reference/builder/)
+ARG CONTAINER_VERSION=13.3
 
-ARG ALPINE_VERSION=3.15.4
-# ╭―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――╮
-# │                                                                         │
-# │ STAGE: src-coredns -- Build from soure                                  │
-# │                                                                         │
-# ╰―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――╯
-FROM gautada/alpine:$ALPINE_VERSION as src-coredns
+# ╭――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――╮
+# │ STAGE 1: Build CoreDNS from source                                       │
+# ╰――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――╯
+FROM golang:1.25-trixie AS builder
 
-# ╭――――――――――――――――――――╮
-# │ VERSION(S)         │
-# ╰――――――――――――――――――――╯
-ARG COREDNS_VERSION=1.9.3
-ARG COREDNS_BRANCH=v$COREDNS_VERSION
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends curl git jq \
+ && rm -rf /var/lib/apt/lists/*
 
-# ╭――――――――――――――――――――╮
-# │ PACKAGES           │
-# ╰――――――――――――――――――――╯
-RUN apk add --no-cache git go
+# Resolve the latest CoreDNS release tag and clone at that version.
+RUN COREDNS_VERSION=$(curl -sL "https://api.github.com/repos/coredns/coredns/releases/latest" \
+      | jq -r '.tag_name' \
+      | tr -d '[:space:]') \
+ && { [ -n "$COREDNS_VERSION" ] && [ "$COREDNS_VERSION" != "null" ] \
+      || { echo "ERROR: failed to resolve latest CoreDNS release from GitHub API" >&2; exit 1; }; } \
+ && echo "Building CoreDNS ${COREDNS_VERSION}" \
+ && git config --global advice.detachedHead false \
+ && git clone --branch "$COREDNS_VERSION" --depth 1 https://github.com/coredns/coredns.git /coredns
 
-# ╭――――――――――――――――――――╮
-# │ SOURCE             │
-# ╰――――――――――――――――――――╯
-# Pull the coredns source code from github. 
-RUN git config --global advice.detachedHead false
-RUN git clone --branch $COREDNS_BRANCH --depth 1 https://github.com/coredns/coredns.git
-
-# ╭――――――――――――――――――――╮
-# │ BUILD              │
-# ╰――――――――――――――――――――╯
 WORKDIR /coredns
-RUN go generate 
-RUN go build
+RUN go generate && go build -o coredns .
 
+# ╭――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――╮
+# │ STAGE 2: Final container image                                           │
+# ╰――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――╯
+FROM docker.io/gautada/debian:${CONTAINER_VERSION} AS container
 
-# ╭―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――╮
-# │                                                                         │
-# │ STAG: coredns-container                                              │
-# │                                                                         │
-# ╰―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――╯
-FROM gautada/alpine:$ALPINE_VERSION
+ARG IMAGE_NAME=coredns
 
 # ╭――――――――――――――――――――╮
 # │ METADATA           │
 # ╰――――――――――――――――――――╯
-LABEL source="https://github.com/gautada/coredns-container.git"
-LABEL maintainer="Adam Gautier <adam@gautier.org>"
-LABEL description="This container is a coredns container."
+LABEL org.opencontainers.image.title="${IMAGE_NAME}"
+LABEL org.opencontainers.image.description="A CoreDNS container based on gautada/debian."
+LABEL org.opencontainers.image.url="https://hub.docker.com/r/gautada/${IMAGE_NAME}"
+LABEL org.opencontainers.image.source="https://github.com/gautada/${IMAGE_NAME}"
+LABEL org.opencontainers.image.license="Apache-2.0"
 
 # ╭――――――――――――――――――――╮
-# │ STANDARD CONFIG    │
+# │ PACKAGES           │
 # ╰――――――――――――――――――――╯
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends jq \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
 
-# USER:
+# ╭――――――――――――――――――――╮
+# │ USER               │
+# ╰――――――――――――――――――――╯
 ARG USER=coredns
-
-ARG UID=1001
-ARG GID=1001
-RUN /usr/sbin/addgroup -g $GID $USER \
- && /usr/sbin/adduser -D -G $USER -s /bin/ash -u $UID $USER \
- && /usr/sbin/usermod -aG wheel $USER \
- && /bin/echo "$USER:$USER" | chpasswd
-
-# PRIVILEGE:
-COPY wheel  /etc/container/wheel
-
-# BACKUP:
-COPY backup /etc/container/backup
-
-# ENTRYPOINT:
-RUN rm -v /etc/container/entrypoint
-COPY entrypoint /etc/container/entrypoint
-
-# FOLDERS
-RUN /bin/chown -R $USER:$USER /mnt/volumes/container \
- && /bin/chown -R $USER:$USER /mnt/volumes/backup \
- && /bin/chown -R $USER:$USER /var/backup \
- && /bin/chown -R $USER:$USER /tmp/backup
+RUN /usr/sbin/usermod -l $USER debian \
+ && /usr/sbin/usermod -d /home/$USER -m $USER \
+ && /usr/sbin/groupmod -n $USER debian \
+ && /bin/echo "$USER:$USER" | /usr/sbin/chpasswd
 
 # ╭――――――――――――――――――――╮
 # │ APPLICATION        │
 # ╰――――――――――――――――――――╯
-COPY --from=src-coredns /coredns/coredns /usr/bin/coredns
-RUN apk add --no-cache py3-requests py3-yaml
+COPY --from=builder /coredns/coredns /usr/bin/coredns
 
-RUN /bin/ln -fsv /mnt/volumes/container/Corefile /mnt/volumes/configmaps/Corefile \
- && /bin/ln -fsv /mnt/volumes/configmaps/Corefile /etc/container/Corefile
-
-RUN /bin/ln -fsv /mnt/volumes/container/zone.local /mnt/volumes/configmaps/zone.local \
- && /bin/ln -fsv /mnt/volumes/configmaps/zone.local /etc/container/zone.local
-
-RUN /bin/ln -fsv /mnt/volumes/container/zone.tld /mnt/volumes/configmaps/zone.tld \
- && /bin/ln -fsv /mnt/volumes/configmaps/zone.tld /etc/container/zone.tld
- 
-COPY blacklist /etc/container/blacklist
-RUN chown $USER:$USER /etc/container/blacklist
-
-RUN /bin/ln -fsv /mnt/volumes/container/blacklist.yml /mnt/volumes/configmaps/blacklist.yml \
- && /bin/ln -fsv /mnt/volumes/configmaps/blacklist.yml /etc/container/blacklist.yml
-
-COPY update-blacklist /usr/bin/update-blacklist
-RUN ln -fsv /usr/bin/update-blacklist /etc/periodic/daily/update-blacklist
-
-RUN ln -s /mnt/volumes/container/backup.cer /etc/container/backup.cer
-RUN rm /usr/bin/container-backup
-RUN ln -s /mnt/volumes/container/container-backup /usr/bin/container-backup
+# Corefile and zone files are supplied via k8s configmap volume mounts.
+RUN mkdir -p /etc/container/configmaps /mnt/volumes/configmaps \
+ && ln -fsv /mnt/volumes/configmaps/Corefile    /etc/container/Corefile \
+ && ln -fsv /mnt/volumes/configmaps/zone.local  /etc/container/zone.local \
+ && ln -fsv /mnt/volumes/configmaps/zone.tld    /etc/container/zone.tld
 
 # ╭――――――――――――――――――――╮
-# │ CONTAINER          │
+# │ VERSION            │
 # ╰――――――――――――――――――――╯
-# USER $USER
-VOLUME /mnt/volumes/backup
+COPY version.sh /usr/bin/container-version
+RUN chmod +x /usr/bin/container-version
+
+# ╭――――――――――――――――――――╮
+# │ LATEST             │
+# ╰――――――――――――――――――――╯
+COPY latest.sh /usr/bin/container-latest
+RUN chmod +x /usr/bin/container-latest
+
+# ╭――――――――――――――――――――╮
+# │ IMGVERSION         │
+# ╰――――――――――――――――――――╯
+COPY imgversion.sh /usr/bin/container-imgversion
+RUN chmod +x /usr/bin/container-imgversion
+
+# ╭――――――――――――――――――――╮
+# │ HEALTH             │
+# ╰――――――――――――――――――――╯
+COPY appversion-check.sh /etc/container/health.d/appversion-check
+RUN chmod +x /etc/container/health.d/appversion-check
+# COPY imgversion.sh /etc/container/health.d/imgversion-check
+# RUN chmod +x /etc/container/health.d/imgversion-check
+COPY coredns-running.sh /etc/container/health.d/coredns-running
+RUN chmod +x /etc/container/health.d/coredns-running
+
+# ╭――――――――――――――――――――╮
+# │ ENTRYPOINT         │
+# ╰――――――――――――――――――――╯
+COPY entrypoint /etc/container/entrypoint
+RUN chmod +x /etc/container/entrypoint
+
 VOLUME /mnt/volumes/configmaps
-VOLUME /mnt/volumes/container
-EXPOSE 53/tcp 53/udp
+EXPOSE 53/tcp
+EXPOSE 53/udp
 EXPOSE 8080/tcp
-EXPOSE 8181/tcp
 EXPOSE 9153/tcp
 
-
+WORKDIR /home/${USER}
