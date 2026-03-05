@@ -6,7 +6,7 @@ ARG CONTAINER_VERSION=13.3
 FROM golang:1.25-trixie AS builder
 
 RUN apt-get update \
- && apt-get install -y --no-install-recommends git \
+ && apt-get install -y --no-install-recommends curl git jq \
  && rm -rf /var/lib/apt/lists/*
 
 # Resolve the latest CoreDNS release tag and clone at that version.
