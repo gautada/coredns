@@ -1,4 +1,4 @@
-#!/bin/ash
+#!/bin/sh
 #
 # entrypoint: Located at `/etc/container/entrypoint` this script is the custom
 #             entry for a container as called by `/usr/bin/container-entrypoint` set

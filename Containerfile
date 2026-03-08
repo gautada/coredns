@@ -42,7 +42,7 @@ LABEL org.opencontainers.image.license="Apache-2.0"
 # │ PACKAGES           │
 # ╰――――――――――――――――――――╯
 RUN apt-get update \
- && apt-get install -y --no-install-recommends jq \
+ && apt-get install -y --no-install-recommends jq libcap2-bin \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
@@ -59,6 +59,7 @@ RUN /usr/sbin/usermod -l $USER debian \
 # │ APPLICATION        │
 # ╰――――――――――――――――――――╯
 COPY --from=builder /coredns/coredns /usr/bin/coredns
+RUN /sbin/setcap cap_net_bind_service=+ep /usr/bin/coredns
 
 # Corefile and zone files are supplied via k8s configmap volume mounts.
 RUN mkdir -p /etc/container/configmaps /mnt/volumes/configmaps \
@@ -106,4 +107,5 @@ EXPOSE 53/udp
 EXPOSE 8080/tcp
 EXPOSE 9153/tcp
 
+USER ${USER}
 WORKDIR /home/${USER}
