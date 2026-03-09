@@ -101,6 +101,7 @@ RUN chmod +x /etc/container/health.d/coredns-running
 COPY coredns.s6 /etc/services.d/coredns/run
 RUN chmod +x /etc/services.d/coredns/run
 
+
 VOLUME /mnt/volumes/configmaps
 EXPOSE 53/tcp
 EXPOSE 53/udp
