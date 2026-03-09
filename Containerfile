@@ -97,8 +97,8 @@ RUN chmod +x /etc/container/health.d/coredns-running
 # ╭――――――――――――――――――――╮
 # │ ENTRYPOINT         │
 # ╰――――――――――――――――――――╯
-COPY entrypoint /etc/container/entrypoint
-RUN chmod +x /etc/container/entrypoint
+# COPY entrypoint /etc/container/entrypoint
+# RUN chmod +x /etc/container/entrypoint
 
 VOLUME /mnt/volumes/configmaps
 EXPOSE 53/tcp
