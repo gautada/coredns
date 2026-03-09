@@ -1,0 +1,14 @@
+$ORIGIN example.tld.
+@   3600 IN SOA ns.example.tld. admin.example.tld. (
+                2026030901 ; serial
+                3600       ; refresh
+                600        ; retry
+                604800     ; expire
+                1800       ; minimum TTL
+            )
+
+    3600 IN NS  ns.example.tld.
+
+ns          60 IN A     10.0.0.1
+www         60 IN A     10.0.0.2
+api         60 IN A     10.0.0.3

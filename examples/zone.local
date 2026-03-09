@@ -1,0 +1,16 @@
+$ORIGIN example.local.
+@   3600 IN SOA ns.example.local. admin.example.local. (
+                2026030901 ; serial
+                3600       ; refresh
+                600        ; retry
+                604800     ; expire
+                1800       ; minimum TTL
+            )
+
+    3600 IN NS  ns.example.local.
+
+ns          60 IN A     192.168.1.1
+gateway     60 IN A     192.168.1.1
+test1       60 IN A     192.168.1.10
+test2       60 IN A     192.168.1.11
+printer     60 IN A     192.168.1.20
