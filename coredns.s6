@@ -1,4 +1,3 @@
 #!/bin/sh
-# s6 service: launches CoreDNS with the mounted Corefile.
-# Corefile and zone files are symlinked into /etc/container via the Containerfile.
-exec /usr/bin/coredns -conf /etc/container/Corefile
+# s6 service: launches CoreDNS under the coredns user with the mounted Corefile.
+exec /usr/bin/s6-setuidgid coredns /usr/bin/coredns -conf /etc/container/Corefile
