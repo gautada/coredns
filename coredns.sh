@@ -1,0 +1,6 @@
+#!/bin/sh
+echo "Launch CoreDNS"
+# s6 service: launches CoreDNS under the coredns user with the mounted Corefile.
+# exec /usr/bin/s6-setuidgid coredns /usr/bin/coredns -conf /etc/container/Corefile
+exec /usr/bin/coredns --conf /etc/container/Corefile
+# exec su coredns -c /usr/bin/coredns --conf /etc/container/Corefile
