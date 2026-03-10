@@ -10,4 +10,4 @@ if curl -sf --max-time 5 http://localhost:8080/health > /dev/null 2>&1; then
 fi
 
 echo "coredns-running: CoreDNS health endpoint not responding on port 8080"
-exit 0
+exit 1

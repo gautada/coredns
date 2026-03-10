@@ -3,10 +3,10 @@
     ready :8181
     prometheus :9153
 
-    kubernetes cluster.local in-addr.arpa ip6.arpa {
-        pods insecure
-        fallthrough in-addr.arpa ip6.arpa
-    }
+    # kubernetes cluster.local in-addr.arpa ip6.arpa {
+    #     pods insecure
+    #     fallthrough in-addr.arpa ip6.arpa
+    # }
 
     file /etc/container/zone.local example.local
     file /etc/container/zone.tld example.tld
