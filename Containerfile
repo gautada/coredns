@@ -101,7 +101,7 @@ RUN chmod +x /etc/container/health.d/coredns-running
 # ╭――――――――――――――――――――╮
 # │ ENTRYPOINT         │
 # ╰――――――――――――――――――――╯
-COPY coredns.s6 /etc/services.d/coredns/run
+COPY coredns.sh /etc/services.d/coredns/run
 RUN chmod +x /etc/services.d/coredns/run
 
 
