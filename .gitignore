@@ -21,3 +21,12 @@ manifest/
 # symlink to this files `ln -s .gitignore .dockerignore`
 .dockerignore
 
+.env
+.flake8
+.hadolint.yaml
+.htmlhintrc
+.jscpd.json
+.markdownlint.yaml
+.pre-commit-config.yaml
+.sqlfluff
+.yamllint.yaml
