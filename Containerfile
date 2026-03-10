@@ -66,6 +66,9 @@ RUN mkdir -p /etc/container/configmaps /mnt/volumes/configmaps \
  && ln -fsv /mnt/volumes/configmaps/Corefile    /etc/container/Corefile \
  && ln -fsv /mnt/volumes/configmaps/zone.local  /etc/container/zone.local \
  && ln -fsv /mnt/volumes/configmaps/zone.tld    /etc/container/zone.tld
+COPY examples/Corefile   /mnt/volumes/configmaps/Corefile
+COPY examples/zone.local /mnt/volumes/configmaps/zone.local
+COPY examples/zone.tld   /mnt/volumes/configmaps/zone.tld
 
 # ╭――――――――――――――――――――╮
 # │ VERSION            │
